@@ -15,7 +15,10 @@ public class GameManager : MonoBehaviour
 
     private TerritoryManager currentTerritoryManager;
     private GameObject currentLevelInstance;
+    private GameObject currentPlayerInstance;
     private int currentLevelNumber;
+
+    private LevelWinCondition currentWinCondition;
 
     public void StartLevel(int levelNumber)
     {
@@ -27,12 +30,26 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Clean up a previously loaded level, if any (lets you restart/replay)
+        // Unsubscribe from the previous level's manager, if any
+        if (currentTerritoryManager != null)
+        {
+            currentTerritoryManager.OnWinningPercentageReached -= HandleWinningPercentageReached;
+        }
+
+        // Clean up the previously loaded level and player, if any
         if (currentLevelInstance != null)
         {
             Destroy(currentLevelInstance);
+            currentLevelInstance = null;
         }
 
+        if (currentPlayerInstance != null)
+        {
+            Destroy(currentPlayerInstance);
+            currentPlayerInstance = null;
+        }
+
+        currentTerritoryManager = null;
         currentLevelNumber = levelNumber;
 
         // Instantiate Level at (0, 0, 0)
@@ -48,27 +65,24 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("GameManager: Instantiated level has no TerritoryManager.", currentLevelInstance);
         }
+        
+        // inside StartLevel(), right after you get territoryManager:
+    currentWinCondition = currentLevelInstance.GetComponentInChildren<LevelWinCondition>();
 
         // Instantiate Player at (0, 0.586, 0)
-        GameObject player = Instantiate(
+        currentPlayerInstance = Instantiate(
             playerPrefab,
             new Vector3(0f, 0.586f, 0f),
             Quaternion.identity
         );
 
         // Assign the newly spawned Player to the camera
-        cameraFollow.SetTarget(player.transform);
+        cameraFollow.SetTarget(currentPlayerInstance.transform);
 
         // Bind the percentage UI to this level's TerritoryManager
         if (territoryPercentage != null)
         {
             territoryPercentage.Bind(territoryManager);
-        }
-
-        // Unsubscribe from the previous level's manager, if any
-        if (currentTerritoryManager != null)
-        {
-            currentTerritoryManager.OnWinningPercentageReached -= HandleWinningPercentageReached;
         }
 
         currentTerritoryManager = territoryManager;
@@ -81,8 +95,12 @@ public class GameManager : MonoBehaviour
 
     private void HandleWinningPercentageReached()
     {
-        // Unlock the next level
         LevelProgress.UnlockLevel(currentLevelNumber + 1);
+
+        if (currentWinCondition != null)
+        {
+            CoinManager.AddCoins(currentWinCondition.CoinReward);
+        }
 
         if (uiManager != null)
         {
@@ -97,4 +115,6 @@ public class GameManager : MonoBehaviour
             currentTerritoryManager.OnWinningPercentageReached -= HandleWinningPercentageReached;
         }
     }
+
+
 }

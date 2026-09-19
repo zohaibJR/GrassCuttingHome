@@ -308,6 +308,7 @@ MonoBehaviour:
   startingWidth: 5
   startingHeight: 5
   drawDebugGrid: 0
+  winCondition: {fileID: 0}
 --- !u!114 &7469032744577546728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,3 +373,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelWinCondition
   winningPercentage: 30
+  coinReward: 40

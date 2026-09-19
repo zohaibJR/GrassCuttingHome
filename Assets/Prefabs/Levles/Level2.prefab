@@ -373,3 +373,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelWinCondition
   winningPercentage: 50
+  coinReward: 60
