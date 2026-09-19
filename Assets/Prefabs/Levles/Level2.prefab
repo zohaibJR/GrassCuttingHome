@@ -155,7 +155,7 @@ GameObject:
   m_Component:
   - component: {fileID: 393393113420522179}
   m_Layer: 0
-  m_Name: Level1
+  m_Name: Level2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -308,6 +308,7 @@ MonoBehaviour:
   startingWidth: 5
   startingHeight: 5
   drawDebugGrid: 0
+  winCondition: {fileID: 0}
 --- !u!114 &7469032744577546728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -371,4 +372,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d71501af4b0907449ed9064be386158, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelWinCondition
-  winningPercentage: 30
+  winningPercentage: 50

@@ -4,28 +4,49 @@ public class GameManager : MonoBehaviour
 {
     [Header("Prefabs")]
     [SerializeField] private GameObject playerPrefab;
-    [SerializeField] private GameObject levelPrefab;
+    [SerializeField] private GameObject[] levelPrefabs; // index 0 = Level 1, index 1 = Level 2, etc.
 
     [Header("Camera")]
     [SerializeField] private CameraFollow cameraFollow;
 
     [Header("UI")]
     [SerializeField] private TerritoryPercentage territoryPercentage;
+    [SerializeField] private UIManager uiManager;
 
-    public void StartLevel1()
+    private TerritoryManager currentTerritoryManager;
+    private GameObject currentLevelInstance;
+    private int currentLevelNumber;
+
+    public void StartLevel(int levelNumber)
     {
+        int index = levelNumber - 1;
+
+        if (index < 0 || index >= levelPrefabs.Length || levelPrefabs[index] == null)
+        {
+            Debug.LogError($"GameManager: No level prefab assigned for level {levelNumber}.", this);
+            return;
+        }
+
+        // Clean up a previously loaded level, if any (lets you restart/replay)
+        if (currentLevelInstance != null)
+        {
+            Destroy(currentLevelInstance);
+        }
+
+        currentLevelNumber = levelNumber;
+
         // Instantiate Level at (0, 0, 0)
-        GameObject level = Instantiate(
-            levelPrefab,
+        currentLevelInstance = Instantiate(
+            levelPrefabs[index],
             Vector3.zero,
             Quaternion.identity
         );
 
-        TerritoryManager territoryManager = level.GetComponentInChildren<TerritoryManager>();
+        TerritoryManager territoryManager = currentLevelInstance.GetComponentInChildren<TerritoryManager>();
 
         if (territoryManager == null)
         {
-            Debug.LogError("GameManager: Instantiated level has no TerritoryManager.", level);
+            Debug.LogError("GameManager: Instantiated level has no TerritoryManager.", currentLevelInstance);
         }
 
         // Instantiate Player at (0, 0.586, 0)
@@ -38,14 +59,42 @@ public class GameManager : MonoBehaviour
         // Assign the newly spawned Player to the camera
         cameraFollow.SetTarget(player.transform);
 
-        // Bind the UI to this level's TerritoryManager
+        // Bind the percentage UI to this level's TerritoryManager
         if (territoryPercentage != null)
         {
             territoryPercentage.Bind(territoryManager);
         }
-        else
+
+        // Unsubscribe from the previous level's manager, if any
+        if (currentTerritoryManager != null)
         {
-            Debug.LogWarning("GameManager: TerritoryPercentage reference not assigned; territory UI will not update.", this);
+            currentTerritoryManager.OnWinningPercentageReached -= HandleWinningPercentageReached;
+        }
+
+        currentTerritoryManager = territoryManager;
+
+        if (currentTerritoryManager != null)
+        {
+            currentTerritoryManager.OnWinningPercentageReached += HandleWinningPercentageReached;
+        }
+    }
+
+    private void HandleWinningPercentageReached()
+    {
+        // Unlock the next level
+        LevelProgress.UnlockLevel(currentLevelNumber + 1);
+
+        if (uiManager != null)
+        {
+            uiManager.ActiveWinningPanel();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (currentTerritoryManager != null)
+        {
+            currentTerritoryManager.OnWinningPercentageReached -= HandleWinningPercentageReached;
         }
     }
 }

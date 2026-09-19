@@ -2,15 +2,9 @@ using UnityEngine;
 
 public class LevelWinCondition : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [Header("Win Settings")]
+    [Range(1f, 100f)]
+    [SerializeField] private float winningPercentage = 50f;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public float WinningPercentage => winningPercentage;
 }

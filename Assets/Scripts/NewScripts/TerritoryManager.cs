@@ -41,6 +41,13 @@ public class TerritoryManager : MonoBehaviour
 
     public event System.Action<TerritoryManager> OnInitialized;
 
+    [Header("Win Condition")]
+    [SerializeField] private LevelWinCondition winCondition;
+
+    public event System.Action OnWinningPercentageReached;
+
+    private bool hasWon;
+
     //[SerializeField] private List<EnemyTerritoryRenderer> enemyTerritoryRenderers = new List<EnemyTerritoryRenderer>();
 
     private static readonly Vector2Int[] Directions =
@@ -63,6 +70,13 @@ public class TerritoryManager : MonoBehaviour
             Debug.LogError("TerritoryManager: Play Area or Territory Renderer is missing.", this);
             return;
         }
+
+        if (winCondition == null)
+        {
+            winCondition = GetComponent<LevelWinCondition>();
+        }
+
+        hasWon = false;
 
         Bounds bounds = playArea.bounds;
         minCell = WorldToCell(bounds.min);
@@ -188,6 +202,8 @@ public class TerritoryManager : MonoBehaviour
             territoryRenderer.SetCutPositionsForNextCapture(cutPositions);
             territoryRenderer.Rebuild(ownedCells);
         }
+
+        CheckWinCondition();
     }
 
     private void CaptureEnclosedArea(IReadOnlyList<Vector3> cutPositions)
@@ -266,6 +282,19 @@ public class TerritoryManager : MonoBehaviour
         if (grassGrid != null && newlyCapturedCells.Count > 0)
         {
             grassGrid.CutCells(newlyCapturedCells);
+        }
+    }
+
+    private void CheckWinCondition()
+    {
+        if (hasWon || winCondition == null || TotalCells <= 0) return;
+
+        float currentPercentage = ownedCells.Count * 100f / TotalCells;
+
+        if (currentPercentage >= winCondition.WinningPercentage)
+        {
+            hasWon = true;
+            OnWinningPercentageReached?.Invoke();
         }
     }
 
