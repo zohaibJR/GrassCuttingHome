@@ -1,67 +1,51 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private TerritoryManager territoryManager;
-    [SerializeField] private GameObject winPanel;
-    [SerializeField] private Text winText;
+    [Header("Prefabs")]
+    [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private GameObject levelPrefab;
 
-    [Header("Win Conditions")]
-    [SerializeField] private float targetPercentage = 50f;
-    [SerializeField] private bool killAllEnemies = true;
+    [Header("Camera")]
+    [SerializeField] private CameraFollow cameraFollow;
 
-    private int totalEnemies;
-    private int killedEnemies;
-    private bool gameWon;
+    [Header("UI")]
+    [SerializeField] private TerritoryPercentage territoryPercentage;
 
-    private void Awake()
+    public void StartLevel1()
     {
+        // Instantiate Level at (0, 0, 0)
+        GameObject level = Instantiate(
+            levelPrefab,
+            Vector3.zero,
+            Quaternion.identity
+        );
+
+        TerritoryManager territoryManager = level.GetComponentInChildren<TerritoryManager>();
+
         if (territoryManager == null)
-            territoryManager = FindFirstObjectByType<TerritoryManager>();
-
-        if (winPanel != null)
-            winPanel.SetActive(false);
-    }
-
-    private void Start()
-    {
-        EnemyAI[] enemies = FindObjectsByType<EnemyAI>(FindObjectsSortMode.None);
-        totalEnemies = enemies.Length;
-    }
-
-    private void Update()
-    {
-        if (gameWon) return;
-
-        int totalCells = territoryManager.TotalCells;
-        if (totalCells <= 0) return;
-
-        float percentage = (territoryManager.OwnedCells.Count * 100f) / totalCells;
-        bool enemiesDefeated = !killAllEnemies || killedEnemies >= totalEnemies;
-        bool percentageReached = percentage >= targetPercentage;
-
-        if (enemiesDefeated && percentageReached)
         {
-            WinGame();
+            Debug.LogError("GameManager: Instantiated level has no TerritoryManager.", level);
         }
-    }
 
-    public void OnEnemyKilled()
-    {
-        killedEnemies++;
-    }
+        // Instantiate Player at (0, 0.586, 0)
+        GameObject player = Instantiate(
+            playerPrefab,
+            new Vector3(0f, 0.586f, 0f),
+            Quaternion.identity
+        );
 
-    private void WinGame()
-    {
-        gameWon = true;
+        // Assign the newly spawned Player to the camera
+        cameraFollow.SetTarget(player.transform);
 
-        if (winPanel != null)
-            winPanel.SetActive(true);
-
-        if (winText != null)
-            winText.text = "YOU WIN!";
+        // Bind the UI to this level's TerritoryManager
+        if (territoryPercentage != null)
+        {
+            territoryPercentage.Bind(territoryManager);
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: TerritoryPercentage reference not assigned; territory UI will not update.", this);
+        }
     }
 }

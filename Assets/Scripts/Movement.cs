@@ -36,7 +36,7 @@ public class Movement : MonoBehaviour
     public Vector3 CurrentMoveDirection => smoothedDirection;
 
     private float fixedYPosition;
-    private bool canMove;
+    private bool canMove = true;
     private bool pointerWasPressed;
 
     private void Awake()

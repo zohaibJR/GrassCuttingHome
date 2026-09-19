@@ -141,9 +141,9 @@ Material:
     - _Color: {r: 0.5098, g: 0.91765, b: 0.16471, a: 1}
     - _Color_Variation: {r: 0.26472464, g: 0.3679245, b: 0.17528479, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _Grass_Interaction_Center: {r: 0.23160449, g: 4.6116767, b: 7.24078, a: 4.29}
-    - _Grass_Interaction_Motion: {r: 0.00000009733861, g: 1, b: 0.99999994, a: 0.4}
-    - _Grass_Interaction_Trail: {r: -0.0000000019499566, g: 0.0027346914, b: 0.7720457, a: 1.504237}
+    - _Grass_Interaction_Center: {r: 0, g: 0, b: 0, a: 0}
+    - _Grass_Interaction_Motion: {r: 0, g: 0, b: 0, a: 0}
+    - _Grass_Interaction_Trail: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999993, g: 0.19999993, b: 0.19999993, a: 0.5}
     - _Top_Color: {r: 0.289776, g: 0.509434, b: 0.13697045, a: 1}
     - _Variation_Offset: {r: 1, g: 1, b: 0, a: 0}

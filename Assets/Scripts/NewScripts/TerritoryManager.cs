@@ -39,7 +39,9 @@ public class TerritoryManager : MonoBehaviour
     private readonly Dictionary<EnemyAI, HashSet<Vector2Int>> enemyTrailCells = new Dictionary<EnemyAI, HashSet<Vector2Int>>();
     private readonly Dictionary<EnemyAI, Vector3> enemyHomePositions = new Dictionary<EnemyAI, Vector3>();
 
-    [SerializeField] private List<EnemyTerritoryRenderer> enemyTerritoryRenderers = new List<EnemyTerritoryRenderer>();
+    public event System.Action<TerritoryManager> OnInitialized;
+
+    //[SerializeField] private List<EnemyTerritoryRenderer> enemyTerritoryRenderers = new List<EnemyTerritoryRenderer>();
 
     private static readonly Vector2Int[] Directions =
     {
@@ -88,7 +90,11 @@ public class TerritoryManager : MonoBehaviour
 
         territoryRenderer.Initialize(this, cellSize);
         territoryRenderer.Rebuild(ownedCells);
+
+        OnInitialized?.Invoke(this);
     }
+
+
 
     private void CreateStartingTerritory()
     {
@@ -497,11 +503,11 @@ public class TerritoryManager : MonoBehaviour
             grassGrid.CutCells(newlyCapturedCells);
         }
 
-        foreach (var renderer in enemyTerritoryRenderers)
-        {
-            if (renderer != null)
-                renderer.Rebuild(newlyCapturedCells);
-        }
+        //foreach (var renderer in enemyTerritoryRenderers)
+        //{
+        //    if (renderer != null)
+        //        renderer.Rebuild(newlyCapturedCells);
+        //}
 
         if (territoryRenderer != null)
         {
@@ -749,11 +755,11 @@ public class TerritoryManager : MonoBehaviour
         return false;
     }
 
-    public void RegisterEnemyTerritoryRenderer(EnemyTerritoryRenderer renderer)
-    {
-        if (!enemyTerritoryRenderers.Contains(renderer))
-            enemyTerritoryRenderers.Add(renderer);
-    }
+    //public void RegisterEnemyTerritoryRenderer(EnemyTerritoryRenderer renderer)
+    //{
+    //    if (!enemyTerritoryRenderers.Contains(renderer))
+    //        enemyTerritoryRenderers.Add(renderer);
+    //}
 
     private void OnDrawGizmosSelected()
     {

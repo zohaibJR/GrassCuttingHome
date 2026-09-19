@@ -3,13 +3,12 @@ using UnityEngine;
 public class CameraFollow : MonoBehaviour
 {
     [Header("Target")]
-    [Tooltip("Assign the Player root, not the rotating blade.")]
+    [Tooltip("Target is assigned automatically when the Player is instantiated.")]
     [SerializeField] private Transform target;
 
     [Header("Position")]
     [SerializeField]
-    private Vector3 offset =
-        new Vector3(0f, 5f, -8f);
+    private Vector3 offset = new Vector3(0f, 5f, -8f);
 
     [Tooltip("Higher values follow faster. Try 0.20 to 0.35.")]
     [Min(0.01f)]
@@ -18,10 +17,9 @@ public class CameraFollow : MonoBehaviour
 
     [Header("Look")]
     [SerializeField]
-    private Vector3 lookOffset =
-        new Vector3(0f, 0.75f, 0f);
+    private Vector3 lookOffset = new Vector3(0f, 0.75f, 0f);
 
-    [Tooltip("Lower values rotate more smoothly.")]
+    [Tooltip("Higher values rotate faster.")]
     [Min(0.1f)]
     [SerializeField]
     private float rotationSmoothness = 7f;
@@ -40,13 +38,13 @@ public class CameraFollow : MonoBehaviour
 
     private void Start()
     {
+        // Target is assigned by GameManager after Player is spawned.
         if (target == null)
         {
             return;
         }
 
-        smoothedLookPoint =
-            target.position + lookOffset;
+        smoothedLookPoint = target.position + lookOffset;
 
         if (snapToTargetOnStart)
         {
@@ -68,6 +66,10 @@ public class CameraFollow : MonoBehaviour
             return;
         }
 
+        // -------------------------
+        // Position
+        // -------------------------
+
         Vector3 desiredPosition =
             target.position + offset;
 
@@ -80,6 +82,10 @@ public class CameraFollow : MonoBehaviour
                 Mathf.Infinity,
                 deltaTime
             );
+
+        // -------------------------
+        // Look Point
+        // -------------------------
 
         Vector3 desiredLookPoint =
             target.position + lookOffset;
@@ -94,9 +100,12 @@ public class CameraFollow : MonoBehaviour
                 deltaTime
             );
 
+        // -------------------------
+        // Rotation
+        // -------------------------
+
         Vector3 lookDirection =
-            smoothedLookPoint -
-            transform.position;
+            smoothedLookPoint - transform.position;
 
         if (lookDirection.sqrMagnitude < 0.0001f)
         {
@@ -109,11 +118,9 @@ public class CameraFollow : MonoBehaviour
                 Vector3.up
             );
 
-        // Frame-rate-independent rotation smoothing.
         float rotationAmount =
             1f - Mathf.Exp(
-                -rotationSmoothness *
-                deltaTime
+                -rotationSmoothness * deltaTime
             );
 
         transform.rotation =
@@ -122,6 +129,19 @@ public class CameraFollow : MonoBehaviour
                 targetRotation,
                 rotationAmount
             );
+    }
+
+    public void SetTarget(Transform newTarget)
+    {
+        target = newTarget;
+
+        if (target == null)
+        {
+            return;
+        }
+
+        // Immediately move camera to the new Player.
+        SnapToTarget();
     }
 
     public void SnapToTarget()
@@ -141,8 +161,7 @@ public class CameraFollow : MonoBehaviour
             target.position + lookOffset;
 
         Vector3 lookDirection =
-            smoothedLookPoint -
-            transform.position;
+            smoothedLookPoint - transform.position;
 
         if (lookDirection.sqrMagnitude > 0.0001f)
         {
