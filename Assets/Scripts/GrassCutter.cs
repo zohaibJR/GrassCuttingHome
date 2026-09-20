@@ -85,6 +85,28 @@ public class GrassCutter : MonoBehaviour
 
     private Movement playerMovement;
 
+    [Header("Cut Audio")]
+    [SerializeField] private AudioSource audioSource;
+
+    [Tooltip("One or more clips; a random one plays each time.")]
+    [SerializeField] private AudioClip[] cutAudioClips;
+
+    [Tooltip("Play a sound every N grass blades cut.")]
+    [Min(1)]
+    [SerializeField] private int cutsPerAudioPlay = 15;
+
+    [Range(0f, 0.2f)]
+    [SerializeField] private float audioPitchVariation = 0.08f;
+
+    [Range(0f, 1f)]
+    [SerializeField] private float audioVolume = 0.6f;
+
+    private int cutsSinceAudio;
+    [Min(0.05f)]
+    [SerializeField] private float minAudioInterval = 0.25f;
+
+    private float nextAudioTime;
+
     private void Awake()
     {
         bladeCollider = GetComponent<Collider>();
@@ -94,6 +116,11 @@ public class GrassCutter : MonoBehaviour
         {
             grassGrid =
                 FindFirstObjectByType<GrassCutGrid>();
+        }
+
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
         }
 
         InitializeParticlePool();
@@ -203,6 +230,8 @@ public class GrassCutter : MonoBehaviour
             return;
         }
 
+        TryPlayCutAudio();
+
         int cutsPerParticle =
             moveStrength >= slowMovementThreshold
                 ? Mathf.Max(1, cutsPerFastParticle)
@@ -218,6 +247,28 @@ public class GrassCutter : MonoBehaviour
 
         grassPosition.y += particleOffset.y;
         PlayCutParticle(grassPosition);
+    }
+
+    private void TryPlayCutAudio()
+    {
+        if (audioSource == null || cutAudioClips == null || cutAudioClips.Length == 0)
+        {
+            return;
+        }
+
+        cutsSinceAudio++;
+
+        if (cutsSinceAudio < cutsPerAudioPlay || Time.time < nextAudioTime)
+        {
+            return;
+        }
+
+        cutsSinceAudio = 0;
+        nextAudioTime = Time.time + minAudioInterval;
+
+        AudioClip clip = cutAudioClips[Random.Range(0, cutAudioClips.Length)];
+        audioSource.pitch = 1f + Random.Range(-audioPitchVariation, audioPitchVariation);
+        audioSource.PlayOneShot(clip, audioVolume);
     }
 
     private void InitializeParticlePool()
@@ -471,6 +522,7 @@ public class GrassCutter : MonoBehaviour
         }
 
         cutsSinceParticle = 0;
+        cutsSinceAudio = 0;
 
         if (particlePool == null)
         {
